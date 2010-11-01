@@ -32,12 +32,6 @@ class FlexGrailsPlugin {
 		'grails-app/domain/**'
 	]
 
-//	List watchedResources = [
-//		'file:${sourceDir}/**/*.mxml',
-//		'file:${sourceDir}/**/*.css',
-//		'file:${sourceDir}/**/*.as'
-//	]
-
 	def doWithWebDescriptor = { xml ->
 		def flatConfig = application.config.flatten()
 		def flexConfig = application.config.grails.plugin.flex
@@ -50,20 +44,19 @@ class FlexGrailsPlugin {
 		// context params
 		if (webtierCompilerEnabled) {
 			String sdk
-			if (flatConfig.containsKey('grails.plugin.flex.sdk')) {
-				sdk = flexConfig.sdk
+			if (flatConfig.containsKey('grails.plugin.flex.home')) {
+				sdk = flexConfig.home
 			}
 			else {
 				sdk = System.getenv('FLEX_HOME')
 			}
 
 			if (!sdk) {
-//				println "No Flex SDK specified. Either set FLEX_HOME in your environment or specify flex.sdk in your grails-app/conf/BuildConfig.groovy file"
-//				System.exit(1)
+				println "\n\nERROR: No Flex SDK specified. Either set FLEX_HOME in your environment or specify flex.sdk in your grails-app/conf/BuildConfig.groovy file\n\n"
 			}
 
-		def contextParams = xml.'context-param'
-		contextParams[contextParams.size() - 1] + {
+			def contextParams = xml.'context-param'
+			contextParams[contextParams.size() - 1] + {
 			'context-param' {
 				'param-name'('flex.class.path')
 					'param-value'("/WEB-INF/flex/hotfixes,/WEB-INF/flex/jars")
