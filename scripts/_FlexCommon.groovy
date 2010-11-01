@@ -42,3 +42,35 @@ if (flexHome) {
 antProperty = { String key -> ant.project.properties[key] }
 
 pluginDirPath = flexPluginDir.path
+
+overwriteAll = false
+
+okToWrite = { String dest ->
+
+	def file = new File(dest)
+	if (overwriteAll || !file.exists()) {
+		return true
+	}
+
+	String propertyName = "file.overwrite.$file.name"
+	ant.input addProperty: propertyName, message: "$dest exists, ok to overwrite?",
+	          validargs: 'y,n,a', defaultvalue: 'y'
+
+	if (ant.antProject.properties."$propertyName" == 'n') {
+		return false
+	}
+
+	if (ant.antProject.properties."$propertyName" == 'a') {
+		overwriteAll = true
+	}
+
+	true
+}
+
+copyFile = { String from, String to, boolean verbose = false ->
+	if (!okToWrite(to)) {
+		return
+	}
+
+	ant.copy file: from, tofile: to, overwrite: true, verbose: verbose
+}

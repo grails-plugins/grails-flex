@@ -1,0 +1,6 @@
+package ${packageName} {
+	public class ${className} {
+		public function ${className}() {
+		}
+	}
+}
