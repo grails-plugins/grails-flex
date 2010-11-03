@@ -1,0 +1,23 @@
+h1. compile-mxml
+
+h2. Purpose
+
+Compiles .mxml files to .swf files and optionally creates a html wrapper file. The general format is:
+
+bc.
+   grails compile-mxml MXML_FILE_NAME \[SWF_FILE_NAME\] \[GSP_WRAPPER_FILE_NAME\]
+
+h2. Examples
+
+bc.
+grails compile-mxml web-app/Main.mxml
+
+bc.
+grails compile-mxml web-app/flex/Main.mxml web-app/Main.swf
+
+bc.
+grails compile-mxml web-app/flex/Main.mxml web-app/Main.swf grails-app/views/Main.gsp
+
+h2. Description
+
+Compiles the specified .mxml file into a .swf, either to the same directory if no output file is specified or to the specified output file if it is. Also generates an HTML wrapper file if the third parameter is specified.

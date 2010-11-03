@@ -1,0 +1,15 @@
+The Flex plugin makes it easier to build Grails-powered Rich Internet Applications using [Adobe Flex|http://www.adobe.com/devnet/flex/] as the front-end client. It depends on the [Blaze DS|http://grails.org/plugin/blazeds] plugin which configures [Adobe BlazeDS|http://opensource.adobe.com/wiki/display/blazeds/BlazeDS/] to provide remoting and messaging as well as the [Spring Security Core|http://grails.org/plugin/spring-security-core] plugin to secure your application.
+
+In development mode you edit MXML and ActionScript files which get compiled into .swf files and support reloading without needing to restart (just like GSPs). When building a war for production deployment your MXML files get precompiled for performance.
+
+h1. Plugin version history
+
+h4. 0.2 (March 6, 2008)
+* Upgraded to BlazeDS release
+* Destination name is now configurable (GRAILSPLUGINS-226)
+
+h4. 0.4 (TODO)
+* Completely rewritten
+* Depends on the BlazeDS plugin
+* Depends on the Spring Security Core plugin to provide support for Spring Security 3
+* Uses Spring Flex version 1.5

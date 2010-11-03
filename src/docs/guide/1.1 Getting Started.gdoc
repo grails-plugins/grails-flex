@@ -1,0 +1,28 @@
+h4. The first step is installing the plugin:
+
+{code}
+grails install-plugin flex
+{code}
+
+This will transtitively install the [BlazeDS|http://grails.org/plugin/blazeds], [Spring Security Core|http://grails.org/plugin/spring-security-core], and [Spring Security ACL|http://grails.org/plugin/spring-security-acl] plugins. Refer to the documentation for these plugins for configuration options. At a minimum you'll need to run the @s2-quickstart@ script to configure Spring Security Core, e.g.
+
+{code}
+grails s2-quickstart com.yourcompany.yourapp User Role
+{code}
+
+The BlazeDS and Spring Security ACL plugins have no required initialization steps.
+
+h4. The next step is configuring the Flex plugin:
+
+You either need to have a @FLEX_HOME@ environment variable set, or set the @grails.plugin.flex.home@ property in @grails-app/conf/Config.groovy@. This must point at the location of a Flex SDK, e.g.
+
+{code}
+grails.plugin.flex.home = 'c:/devtools/flex'
+{code}
+
+Once that's configured, run the [flex-init|Scripts] script to copy the required development files to your project (in the @web-app/WEB-INF/flex@ folder):
+
+{code}
+grails flex-init
+{code}
+

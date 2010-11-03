@@ -1,0 +1,17 @@
+h1. integrate-with-flash-builder
+
+h2. Purpose
+
+Adds support for Flash Builder to an existing Grails project.
+
+bc.
+   grails integrate-with-flash-builder
+
+h2. Description
+
+* modifies your .project file (but creates a backup):
+** adds the @com.adobe.flexbuilder.project.flexbuilder@ builder
+** adds the @com.adobe.flexbuilder.project.flexnature@ nature
+** adds the @com.adobe.flexbuilder.project.actionscriptnature@ nature
+* creates a .flexProperties file
+* creates an .actionScriptProperties file

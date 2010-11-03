@@ -1,0 +1,20 @@
+h1. generate-actionscript-class
+
+h2. Purpose
+
+Generates an ActionScript class from a domain class. The general format is:
+
+bc.
+   grails generate-actionscript-class ACTIONSCRIPT_CLASS_NAME DOMAIN_CLASS_NAME \[DESTINATION_FOLDER\]
+
+h2. Examples
+
+bc.
+grails generate-actionscript-class com.yourcompany.yourapp.Person com.yourcompany.yourapp.Person
+
+bc.
+grails generate-actionscript-class yourapp.Organization com.yourcompany.yourapp.Organization web-app/flex
+
+h2. Description
+
+Generates an ActionScript data class from a domain class. Creates relative to the web-app folder if no destination is specified, and relative to the destination if it is specified.

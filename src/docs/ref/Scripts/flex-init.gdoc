@@ -1,0 +1,17 @@
+h1. flex-init
+
+h2. Purpose
+
+Initializes the Flex development environment. This script should be run after installing the plugin and only needs to be run once.
+Requires that either the @FLEX_HOME@ environment variable is set, or that the @grails.plugin.flex.home@ property is set in @grails-app/conf/Config.groovy@.
+
+bc.
+   grails flex-init
+
+h2. Description
+
+* copies Flex SDK files to web-app/WEB-INF/flex, including:
+** several jar files required for the web-tier compiler to lib
+** standard libs, locale, and themes files
+** creates initial @flex-config.xml@ and @flex-webtier-config.xml@ files
+** creates the @user_classes@ directory for extra custom libraries

@@ -1,0 +1,20 @@
+h1. create-actionscript-class
+
+h2. Purpose
+
+Creates an ActionScript source file. The general format is:
+
+bc.
+   grails create-actionscript-class FULL_CLASS_NAME \[DESTINATION_FOLDER\]
+
+h2. Examples
+
+bc.
+grails create-actionscript-class com.yourcompany.yourapp.Person
+
+bc.
+grails create-actionscript-class com.yourcompany.yourapp.Organization web-app/flex
+
+h2. Description
+
+Creates an ActionScript class using the specified name. Creates relative to the web-app folder if no destination is specified, and relative to the destination if it is specified.

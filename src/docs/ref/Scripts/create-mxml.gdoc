@@ -1,0 +1,18 @@
+h1. create-mxml
+
+h2. Purpose
+
+Creates an MXML source file. The general format is:
+
+bc.
+   grails create-mxml MXML_FILE_NAME
+
+h2. Examples
+
+bc.
+grails create-mxml web-app/Main.mxml
+
+h2. Description
+
+Creates an MXML file using the specified name and location.
+

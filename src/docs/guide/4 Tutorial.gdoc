@@ -1,0 +1,419 @@
+h4. 1. Create your Grails application.
+
+{code}
+$ grails create-app FlexContacts
+$ cd FlexContacts
+{code}
+
+h4. 2. Install the plugin.
+{code}
+$ grails install-plugin flex
+{code}
+
+h4. 3. Initialize Spring Security.
+{code}
+$ grails s2-quickstart grails.demo.flexcontacts User Role
+{code}
+
+h4. 4. Configure the Flex SDK location.
+
+If you don't have a @FLEX_HOME@ environment variable set, configure the location of your Flex SDK in @grails-app/conf/Config.groovy@:
+
+{code}
+grails.plugin.flex.home = '/path/to/your/flex/sdk'
+{code}
+
+h4. 5. Initialize the Flex plugin.
+{code}
+$ grails flex-init
+{code}
+
+h4. 6. Create the Contact domain class.
+{code}
+$ grails create-domain-class grails.demo.flexcontacts.Contact
+{code}
+
+Update the domain class with this code:
+
+{code}
+package grails.demo.flexcontacts
+
+class Contact implements Serializable {
+
+   static final long serialVersionUID = 1
+
+   String firstName
+   String lastName
+   String address
+   String city
+   String state
+   String zip
+   String phone
+   String email
+
+   static constraints = {
+      firstName size: 1..50, blank: false
+      lastName size: 1..50, blank: false
+      address size: 1..50, blank: false
+      city size: 1..50, blank: false
+      state size: 1..20, blank: false
+      zip size: 1..20, nullable: true
+      phone size: 1..50, nullable: true
+      email size: 1..50, blank: false
+   }
+
+   static List<Contact> findByName(String name) {
+      executeQuery("from Contact where UPPER(CONCAT(firstName, ' ', lastName)) LIKE :name ORDER BY firstName, lastName",
+         [name: "%" + name.toUpperCase() + "%"])
+   }
+}
+{code}
+
+h4. 7. Create the Contact service.
+{code}
+$ grails create-service grails.demo.flexcontacts.Contact
+{code}
+
+Update the service with this code:
+
+{code}
+package grails.demo.flexcontacts
+
+import org.springframework.flex.remoting.RemotingDestination
+
+@RemotingDestination(channels = ['my-amf'])
+class ContactService {
+
+   List<Contact> findByName(String name) {
+      Contact.findByName name
+   }
+
+   List<Contact> findAll() {
+      Contact.list()
+   }
+
+   Contact findById(long id) {
+      Contact.get id
+   }
+
+   Contact create(Contact contact) {
+      contact.id = null
+      contact.save()
+      contact
+   }
+
+   boolean update(Contact contact) {
+      Contact fromDb = Contact.get(contact.id)
+      if (!fromDb) {
+         return false
+      }
+      fromDb.properties = contact.properties
+      fromDb.validate() && fromDb.save()
+   }
+
+   boolean remove(Contact contact) {
+      Contact.get(contact.id)?.delete()
+      true
+   }
+}
+{code}
+
+h4. 8. Create the primary MXML file.
+{code}
+$ grails create-mxml web-app/Main.mxml
+{code}
+
+Update the MXML file with this code:
+
+{code}
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns="*">
+
+   <mx:Script><![CDATA[
+
+      import mx.rpc.events.FaultEvent;
+      import mx.controls.Alert;
+      import mx.collections.ArrayCollection;
+      import mx.rpc.events.ResultEvent;
+
+      [Bindable] private var contacts:ArrayCollection;
+
+      private function resultHandler(event:ResultEvent):void {
+         contacts = event.result as ArrayCollection
+      }
+
+      private function faultHandler(event:FaultEvent):void {
+         Alert.show(event.fault.faultDetail);
+      }
+
+      public function openContact(contact:Contact):void {
+         var children:Array = tn.getChildren();
+         for (var i:int = 0; i<children.length; i++) {
+            if (ContactForm(children[i]).contact.id == contact.id) {
+               tn.selectedChild = children[i];
+               return;
+            }
+         }
+
+         var form:ContactForm = new ContactForm();
+         tn.addChild(form);
+         form.contact = contact;
+         tn.selectedChild = form;
+      }
+   ]]></mx:Script>
+
+   <mx:RemoteObject id="ro" destination="contactService" fault="faultHandler(event)">
+      <mx:method name="findByName" result="resultHandler(event)"/>
+   </mx:RemoteObject>
+
+   <mx:ApplicationControlBar width="100%">
+      <mx:TextInput id="searchStr"/>
+      <mx:Button label="Search" click="ro.findByName(searchStr.text)"/>
+      <mx:Button label="New Contact" click="openContact(new Contact())"/>
+   </mx:ApplicationControlBar>
+
+   <mx:HDividedBox width="100%" height="100%">
+      <mx:DataGrid id="dg" dataProvider="{contacts}" width="30%" height="100%"
+         doubleClickEnabled="true"
+         doubleClick="openContact(dg.selectedItem as Contact)">
+         <mx:columns>
+            <mx:DataGridColumn dataField="firstName" headerText="First Name"/>
+            <mx:DataGridColumn dataField="lastName" headerText="Last Name"/>
+         </mx:columns>
+      </mx:DataGrid>
+      <mx:TabNavigator id="tn" width="70%" height="100%"/>
+   </mx:HDividedBox>
+
+</mx:Application>
+{code}
+
+h4. 9. Create the contact form MXML file.
+{code}
+$ grails create-mxml web-app/ContactForm.mxml
+{code}
+
+Update the MXML file with this code:
+
+{code}
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+   backgroundColor="#FFFFFF"
+   label="{contact.id>0?contact.firstName+' '+contact.lastName:'New Contact'}">
+
+   <mx:Script><![CDATA[
+
+      import mx.rpc.events.FaultEvent;
+      import mx.rpc.events.ResultEvent;
+      import mx.controls.Alert;
+
+      [Bindable] public var contact:Contact;
+
+      private function save():void {
+         contact.firstName = firstName.text;
+         contact.lastName = lastName.text;
+         contact.email = email.text;
+         contact.phone = phone.text;
+         contact.address = address.text;
+         contact.city = city.text;
+         contact.state = state.text;
+         contact.zip = zip.text;
+         if (contact.id == 0) {
+            ro.create(contact);
+         }
+         else {
+            ro.update(contact);
+         }
+      }
+
+      private function create_resultHandler(event:ResultEvent):void {
+         contact.id = event.result.id;
+      }
+
+      private function deleteItem():void {
+         ro.remove(contact);
+      }
+
+      private function remove_resultHandler(event:ResultEvent):void {
+         parent.removeChild(this);
+      }
+
+      private function faultHandler(event:FaultEvent):void {
+         Alert.show(event.fault.faultDetail);
+      }
+   ]]></mx:Script>
+
+   <mx:RemoteObject id="ro" destination="contactService">
+      <mx:method name="create" result="create_resultHandler(event)"/>
+      <mx:method name="remove" result="remove_resultHandler(event)"/>
+   </mx:RemoteObject>
+
+   <mx:Form>
+      <mx:FormItem label="Id">
+         <mx:TextInput text="{contact.id}" enabled="false"/>
+      </mx:FormItem>
+      <mx:FormItem label="First Name">
+         <mx:TextInput id="firstName" text="{contact.firstName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Last Name">
+         <mx:TextInput id="lastName" text="{contact.lastName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Email">
+         <mx:TextInput id="email" text="{contact.email}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Phone">
+         <mx:TextInput id="phone" text="{contact.phone}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Address">
+         <mx:TextInput id="address" text="{contact.address}"/>
+      </mx:FormItem>
+      <mx:FormItem label="City">
+         <mx:TextInput id="city" text="{contact.city}"/>
+      </mx:FormItem>
+      <mx:FormItem label="State">
+         <mx:TextInput id="state" text="{contact.state}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Zip">
+         <mx:TextInput id="zip" text="{contact.zip}"/>
+      </mx:FormItem>
+   </mx:Form>
+
+   <mx:HBox left="8" bottom="8">
+      <mx:Button label="Close" click="parent.removeChild(this)"/>
+      <mx:Button label="Save" click="save()"/>
+      <mx:Button label="Delete" click="deleteItem()"/>
+   </mx:HBox>
+
+</mx:Canvas>
+{code}
+
+h4. 10. Generate the Contact ActionScript class.
+{code}
+$ grails generate-actionscript-class Contact grails.demo.flexcontacts.Contact
+{code}
+
+That will create this ActionScript class:
+
+{code}
+package  {
+
+   [Bindable]
+   [RemoteClass(alias='grails.demo.flexcontacts.Contact')]
+   public class Contact {
+      public function Contact() {
+         // constructor
+      }
+
+      public var id:int;
+      public var address:String;
+      public var city:String;
+      public var email:String;
+      public var firstName:String;
+      public var lastName:String;
+      public var phone:String;
+      public var state:String;
+      public var zip:String;
+   }
+}
+{code}
+
+h4. 11. Edit grails-app/conf/BootStrap.groovy and add some test data.
+
+{code}
+import grails.demo.flexcontacts.Contact
+
+class BootStrap {
+
+   def sessionFactory
+
+   def init = { servletContext ->
+      createContacts()
+      sessionFactory.currentSession.flush()
+   }
+
+   private void createContacts() {
+      if (Contact.count()) {
+         println 'Contacts already exist'
+      }
+      else {
+         println 'Inserting sample data in table CONTACT...'
+         createContact 'Christophe', 'Coenraets', '275 Grove St', 'Newton', 'MA', '02476', '617-219-2000', 'ccoenrae@adobe.com'
+         createContact 'John', 'Smith', '1 Main st', 'Boston', 'MA', '01744', '617-219-2001', 'jsmith@mail.com'
+         createContact 'Lisa', 'Taylor', '501 Townsend st', 'San Francisco', 'CA', '', '415-534-7865', 'ltaylor@mail.com'
+         createContact 'Noah', 'Jones', '1200 5th Avenue ', 'New York', 'NY', '', '212-764-2345', 'njones@mail.com'
+         createContact 'Bill', 'Johnson', '1345 6th street', 'Chicago', 'IL', '', '', 'bjohnson@mail.com'
+         createContact 'Chloe', 'Rodriguez', '34 Elm street', 'Dallas', 'TX', '', '415-534-7865', 'crodriguez@mail.com'
+         createContact 'Jorge', 'Espinosa', '23 Putnam Avenue', 'Seattle', 'WA', '', '', 'jespinosa@mail.com'
+         createContact 'Amy', 'King', '11 Summer st', 'Miami', 'FL', '', '', 'aking@mail.com'
+         createContact 'Boris', 'Jefferson', '222 Spring st', 'Denver', 'CO', '', '415-534-7865', 'bjefferson@mail.com'
+         createContact 'Linda', 'Madison', '564 Winter st', 'Washington', 'DC', '', '', 'lmadison@mail.com'
+      }
+   }
+
+   private void createContact(String firstName, String lastName, String address, String city,
+         String state, String zip, String phone, String email) {
+      new Contact(firstName: firstName, lastName: lastName, address: address, city: city,
+            state: state, zip: zip, phone: phone, email: email).save(failOnError: true)
+   }
+}
+{code}
+
+h4. 12. Start the server.
+{code}
+$ grails run-app
+{code}
+
+h4. 13. Navigate to [http://localhost:8080/FlexContacts/Main.mxml|http://localhost:8080/FlexContacts/Main.mxml].
+
+The Flash page should load after the webtier mxmlc compiler compiles the swf.
+
+h4. 14. Experiment with the application.
+
+* if you leave the search box empty all users will be returned
+* you can also search by full or partial name
+* double-clicking a name in the result list displays the edit form for that person
+* making changes to a person's contact data should update the search results
+* creating or deleting a contact doesn't update the search results - re-run the search to refresh
+* you can sort the results by clicking the First Name and Last Name column headers
+
+h4. 15. Verify that ActionScript isn't browseable.
+
+Attempt to open [http://localhost:8080/FlexContacts/Contact.as|http://localhost:8080/FlexContacts/Contact.as] in a browser - you should get a 403 error page even though it's in the web-app folder and .mxml files load. This is because ActionScript files are explicitly blocked, as are .mxml files in production mode (which we'll see in a bit).
+
+h4. 16. Build and deploy a war file.
+
+Shut down the development mode application (using CTRL-C).
+
+Configure precompilation in @grails-app/conf/Config.groovy@:
+
+{code}
+grails.plugin.flex.precompileMxml.enabled = true
+grails.plugin.flex.precompileMxml.files = ['Main.mxml']
+grails.plugin.flex.precompileMxml.htmlWrapper.create = true
+grails.plugin.flex.mxmlc.contextRoot = 'FlexContacts'
+{code}
+
+The last line configuring the @contextRoot@ attribute is required since @run-war@ deploys with the same context as in development, but in general this should be configured with the actual value of the context root.
+
+Start the app using a war in production mode:
+
+{code}
+$ grails prod run-war
+{code}
+
+Note that the output indicates that Main.mxml gets precompiled and that a GSP wrapper is created for it:
+
+{code}
+[echo] Precompiling MXML Main.mxml
+ . . .
+[echo] Generating Main.gsp
+{code}
+
+h4. 17. Navigate to [http://localhost:8080/FlexContacts/Main.gsp|http://localhost:8080/FlexContacts/Main.gsp].
+
+The Flash page should load very quickly since the swf is already compiled. The functionality should be the same as before when testing with Main.mxml.
+
+h4. 18. Verify that ActionScript and MXML aren't browseable in production mode.
+
+Attempt to open [http://localhost:8080/FlexContacts/Contact.as|http://localhost:8080/FlexContacts/Contact.as] in a browser - you should get a 403 error page even though it's in the web-app folder. Also attempt to open [http://localhost:8080/FlexContacts/Main.mxml|http://localhost:8080/FlexContacts/Main.mxml] in a browser - you should get a 403 for that too. This is because ActionScript and MXML files are explicitly blocked in production mode - only .swf files can be loaded.
+
+

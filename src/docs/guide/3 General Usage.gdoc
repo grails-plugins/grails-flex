@@ -1,0 +1,56 @@
+h4. Runtime configuration
+
+The plugin (with help from the [BlazeDS plugin|http://grails.org/plugin/blazeds]) manages the configuration of BlazeDS and Flex for you. This includes configuring the webtier mxml compiler and support (@flex.webtier.server.j2ee.MxmlServlet@ and @flex.webtier.server.j2ee.SwfServlet@) if enabled (true by default in development mode) and the @flex.webtier.server.j2ee.ForbiddenServlet@ which denies access to source code files.
+
+When you run the [flex-init|Scripts] script, initial @flex-config.xml@ and @flex-webtier-config.xml@ configuration files are generated in the @/WEB-INF/flex/@ folder, and required resources from your Flex SDK are also copied there. You can customize all of these but the initial configuration should be sufficient to get started.
+
+h4. Development mode
+
+In development mode you can create and edit .mxml and .as files in the web-app folder or subfolders and load the .mxml files in a web browser. They'll get compiled into a .swf file and loaded if it's the first time you've loaded them, or if one of the source files (the top-level .mxml file or any referenced .mxml or .as file) has changed. 
+
+h4. Production mode
+
+In production mode files are precompiled (like GSPs) so there's no initial compilation lag and performance is maximized. Precompilation is configurable via settings and you can also explicitly compile the files yourself, either with the [compile-xml|Scripts] script or by using the SDK tools directly.
+
+h4. Grails services as remote destinations
+
+As described in the BlazeDS plugin documentation, it's simple to access a Grails service as a remote service from Flex - just annotate the service with the @org.springframework.flex.remoting.RemotingDestination@ annotation. BlazeDS handles invoking method calls and marshalling parameters and return values for you.
+
+One thing that's important to note is that although there are two XML configuration files (@flex-config.xml@ and @flex-webtier-config.xml@) you probably won't need to make many changes there. In typical Flex applications you would register remote services using XML, but Grails services are well suited as candidates for remote services.
+
+h4. Flash Builder integration
+
+You can easily create Flex-based applications using your IDE or a text editor but using Flash Builder is a lot more convenient. The standard project layout for Flash Builder isn't the same as for Grails though, so you can run the [integrate-with-flash-builder|Scripts] script to update your Eclipse/STS .project file and create .flexProperties and .actionScriptProperties files, all configured with settings that are compatible for both environments.
+
+h4. Scripts
+
+You can use the plugins file-generating scripts to help create MXML and ActionScript classes. These include [create-mxml|Scripts] which creates a basic MXML file, [create-actionscript-class|Scripts] which creates a basic ActionScript class, and [generate-actionscript-class|Scripts] which generates an ActionScript class based on one of your domain classes for use with remote services.
+
+h4. Manual configuration
+
+You're not limited to using Grails services as the server-side implementation of remote services. You can use any class like you would in a non-Grails application, and the best place to configure this is in @grails-app/conf/spring/resources.groovy@ using the BeanBuilder syntax equivalent of the Spring Flex XML configuration.
+
+For example, this resources.groovy file contains four messaging destinations and two remoting destinations. Remoting destinations are configured like any other Spring bean, with the addition of a @flex.'remoting-destination'()@ child element, optionally with configuration options. See the [Spring Flex|http://www.springsource.org/spring-flex] documentation for more information on what's available.
+
+{code}
+import flex.management.jmx.MBeanServerGateway
+
+beans = {
+
+   xmlns flex: 'http://www.springframework.org/schema/flex'
+
+   flex.'message-destination'(id: 'chat')
+   flex.'message-destination'(id: 'secured-chat', 'send-security-constraint': 'trusted')
+   flex.'message-destination'(id: 'simple-feed')
+   flex.'message-destination'(id: 'market-feed', 'allow-subtopics': true, 'subtopic-separator': '.')
+
+   securityHelper(Security3Helper) {
+      flex.'remoting-destination'()
+   }
+
+   RuntimeManagement(MBeanServerGateway) {
+      flex.'remoting-destination'(channels: 'my-amf, my-secure-amf')
+   }
+}
+{code}
+

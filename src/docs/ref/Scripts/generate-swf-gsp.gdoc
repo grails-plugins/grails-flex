@@ -1,0 +1,17 @@
+h1. generate-swf-gsp
+
+h2. Purpose
+
+Generates a wrapper html file for the specified .swf file, either to the same directory if no output file is specified or to the specified output file if it is. The general format is:
+
+bc.
+   generate-swf-gsp SWF_FILE_NAME \[GSP_FILE_NAME\]
+
+h2. Examples
+
+bc.
+grails generate-swf-gsp web-app/Main.swf
+
+bc.
+grails generate-swf-gsp web-app/Main.swf grails-app/views/Main.gsp
+
