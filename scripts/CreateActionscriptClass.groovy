@@ -18,21 +18,20 @@
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
  */
 
-import groovy.text.SimpleTemplateEngine
-
 includeTargets << new File("$flexPluginDir/scripts/_FlexCommon.groovy")
+includeTargets << new File("$flexPluginDir/scripts/_GenerateTasks.groovy")
 
 USAGE = """
-Usage: grails generate-actionscript <actionscript class name and package> [destination folder]
+Usage: grails create-actionscript-class <actionscript class name and package> [destination folder]
 
 Creates an ActionScript class using the specified name. Creates relative to the web-app
 folder if no destination is specified, and relative to the destination if it is specified.
 
-Example: grails generate-actionscript com.yourcompany.yourapp.Person
-Example: grails generate-actionscript com.yourcompany.yourapp.Organization web-app/flex
+Example: grails create-actionscript-class com.yourcompany.yourapp.Person
+Example: grails create-actionscript-class com.yourcompany.yourapp.Organization web-app/flex
 """
 
-target(generateActionscript: 'Creates an ActionScript class') {
+target(createActionscriptClass: 'Creates an ActionScript class') {
 	depends(checkVersion, configureProxy)
 
 	args = args ? args.split('\n') : []
@@ -58,62 +57,12 @@ target(generateActionscript: 'Creates an ActionScript class') {
 	String className
 	(packageName, className) = splitClassName(fullClassName)
 
-	templateAttributes = [packageName: packageName,
-	                      className: className]
-
-	templateEngine = new SimpleTemplateEngine()
+	templateAttributes.packageName = packageName
+	templateAttributes.className = className
 
 	String dir = packageToDir(packageName)
 	generateFile "$pluginDirPath/src/resources/mxml/as.template",
 	             "$destDir/${dir}${className}.as"
 }
 
-packageToDir = { String packageName ->
-	String dir = ''
-	if (packageName) {
-		dir = packageName.replaceAll('\\.', '/') + '/'
-	}
-	dir
-}
-
-splitClassName = { String fullName ->
-
-	int index = fullName.lastIndexOf('.')
-	String packageName = ''
-	String className = ''
-	if (index > -1) {
-		packageName = fullName[0..index-1]
-		className = fullName[index+1..-1]
-	}
-	else { 
-		packageName = ''
-		className = fullName
-	}
-
-	[packageName, className]
-}
-
-generateFile = { String templatePath, String outputPath ->
-	if (!okToWrite(outputPath)) {
-		return
-	}
-
-	File templateFile = new File(templatePath)
-	if (!templateFile.exists()) {
-		ant.echo message: "\nERROR: $templatePath doesn't exist"
-		return
-	}
-
-	File outFile = new File(outputPath)
-
-	// in case it's in a package, create dirs
-	ant.mkdir dir: outFile.parentFile
-
-	outFile.withWriter { writer ->
-		templateEngine.createTemplate(templateFile.text).make(templateAttributes).writeTo(writer)
-	}
-
-	ant.echo message: "generated $outFile.absolutePath"
-}
-
-setDefaultTarget 'generateActionscript'
+setDefaultTarget 'createActionscriptClass'

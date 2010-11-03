@@ -21,14 +21,14 @@
 includeTargets << new File("$flexPluginDir/scripts/_FlexCommon.groovy")
 
 USAGE = """
-Usage: grails generate-mxml <mxml file name>
+Usage: grails create-mxml <mxml file name>
 
 Creates an MXML file using the specified name and location.
 
-Example: grails generate-mxml web-app/Main.mxml
+Example: grails create-mxml web-app/Main.mxml
 """
 
-target(generateMxml: 'Creates an MXML file') {
+target(createMxml: 'Creates an MXML file') {
 	depends(checkVersion, configureProxy)
 
 	args = args ? args.split('\n') : []
@@ -66,4 +66,4 @@ target(generateMxml: 'Creates an MXML file') {
 	         new File(history, 'historyFrame.html').path, true
 }
 
-setDefaultTarget 'generateMxml'
+setDefaultTarget 'createMxml'

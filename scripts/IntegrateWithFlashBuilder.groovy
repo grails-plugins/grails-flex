@@ -31,7 +31,7 @@ serverRootUrl = "http://localhost:8080/$grailsAppName"
 outputFolder = "web-app"
 localePath = "\$DOCUMENTS/$grailsAppName/grails-app/i18n"
 
-target(generateFlashBuilder: 'Configures project files for Flash Builder') {
+target(integrateWithFlashBuilder: 'Configures project files for Flash Builder') {
 	depends(addFlexNature, createDotFlexProperties, createActionScriptProperties)
 }
 
@@ -146,4 +146,4 @@ target(createActionScriptProperties: 'Create .actionScriptProperties') {
 	            token: "@lib-dir@", value: antProperty('lib.destdir')
 }
 
-setDefaultTarget 'generateFlashBuilder'
+setDefaultTarget 'integrateWithFlashBuilder'

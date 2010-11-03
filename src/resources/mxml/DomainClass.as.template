@@ -1,0 +1,62 @@
+package ${packageName} {
+
+	[Bindable]
+	[RemoteClass(alias='${domainClass.clazz.name}')]
+	public class ${className} {
+		public function ${className}() {
+			// constructor
+		}
+<%
+def excludedProps = grails.persistence.Event.allEvents.toList() << 'version'
+def allowedNames = domainClass.persistentProperties*.name << 'id' << 'dateCreated' << 'lastUpdated'
+def props = domainClass.properties.findAll { allowedNames.contains(it.name) && !excludedProps.contains(it.name) }
+
+def renderVariable = { prop ->
+	if (prop.type == String || prop.type == Character || prop.type == Character[]) {
+		return "public var ${prop.name}:String;"
+	}
+
+	if (prop.type == Boolean || prop.type == boolean) {
+		return "public var ${prop.name}:Boolean;"
+	}
+
+	if (prop.type == ([] as Byte[]).class) {
+		return "public var ${prop.name}:flash.utils.ByteArray;"
+	}
+
+	if (prop.type == Date || prop.type == java.sql.Date || prop.type == java.sql.Time || prop.type == Calendar) {
+		return "public var ${prop.name}:Date;"
+	}
+
+	if (Number.isAssignableFrom(prop.type) || prop.type.isPrimitive()) {
+		if (prop.type == Integer || prop.type == int || prop.type == Long || prop.type == long) {
+			return "public var ${prop.name}:int;"
+		}
+		return "public var ${prop.name}:Number;"
+	}
+
+	null
+}
+
+def renderIfVisible = { domainClass, prop ->
+	def cp = domainClass.constrainedProperties[prop.name]
+	boolean display = cp ? cp.display : true
+	display ? renderVariable(prop) : null
+}
+
+// display ID first
+def idProperty = props.find { it.isIdentity() }
+String declaration = renderIfVisible(domainClass, idProperty)
+if (declaration) { %>
+		${declaration}<%
+}
+for (prop in props.sort { it.name }) {
+	if (prop.name == 'id') continue
+	declaration = renderIfVisible(domainClass, prop)
+	if (declaration) { %>
+		${declaration}<%
+	}
+}
+%>
+	}
+}
