@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>1.1 Getting Started</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h4>The first step is installing the plugin:</h4><p class="paragraph"/><div class="code"><pre>grails install&#45;plugin flex</pre></div><p class="paragraph"/>This will transtitively install the <a href="http://grails.org/plugin/blazeds" target="blank">BlazeDS</a>, <a href="http://grails.org/plugin/spring-security-core" target="blank">Spring Security Core</a>, and <a href="http://grails.org/plugin/spring-security-acl" target="blank">Spring Security ACL</a> plugins. Refer to the documentation for these plugins for configuration options. At a minimum you'll need to run the <code>s2-quickstart</code> script to configure Spring Security Core, e.g.<p class="paragraph"/><div class="code"><pre>grails s2&#45;quickstart com.yourcompany.yourapp User Role</pre></div><p class="paragraph"/>The BlazeDS and Spring Security ACL plugins have no required initialization steps.<p class="paragraph"/><h4>The next step is configuring the Flex plugin:</h4><p class="paragraph"/>You either need to have a <code>FLEX_HOME</code> environment variable set, or set the <code>grails.plugin.flex.home</code> property in <code>grails-app/conf/Config.groovy</code>. This must point at the location of a Flex SDK, e.g.<p class="paragraph"/><div class="code"><pre>grails.plugin.flex.home = 'c:/devtools/flex'</pre></div><p class="paragraph"/>Once that's configured, run the <a href="../ref/Scripts/flex-init.html" class="Scripts">flex-init</a> script to copy the required development files to your project (in the <code>web-app/WEB-INF/flex</code> folder):<p class="paragraph"/><div class="code"><pre>grails flex&#45;init</pre></div><p class="paragraph"/>
+    
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>

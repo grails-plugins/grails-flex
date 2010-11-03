@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>Flex Plugin 0.4 - Reference Documentation</title>
+        <link rel="stylesheet" href="../../css/ref.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h1>flex-init</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Initializes the Flex development environment. This script should be run after installing the plugin and only needs to be run once.
+Requires that either the <code>FLEX_HOME</code> environment variable is set, or that the <code>grails.plugin.flex.home</code> property is set in <code>grails-app/conf/Config.groovy</code>.<p class="paragraph"/><pre class="bq"><code>
+   grails flex-init</code></pre><p class="paragraph"/><h2>Description</h2>
+<ul class="star">
+<li>copies Flex SDK files to web-app/WEB-INF/flex, including:</li>
+<ul class="star">
+<li>several jar files required for the web-tier compiler to lib</li>
+<li>standard libs, locale, and themes files</li>
+<li>creates initial <code>flex-config.xml</code> and <code>flex-webtier-config.xml</code> files</li>
+<li>creates the <code>user_classes</code> directory for extra custom libraries</li>
+</ul></ul><p class="paragraph"/>
+    
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>

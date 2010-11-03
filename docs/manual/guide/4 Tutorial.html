@@ -1,0 +1,228 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>4 Tutorial</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h1><a name="4 Tutorial">4 Tutorial</a></h1><h4>1. Create your Grails application.</h4><p class="paragraph"/><div class="code"><pre>$ grails create&#45;app FlexContacts
+$ cd FlexContacts</pre></div><p class="paragraph"/><h4>2. Install the plugin.</h4>
+<div class="code"><pre>$ grails install&#45;plugin flex</pre></div><p class="paragraph"/><h4>3. Initialize Spring Security.</h4>
+<div class="code"><pre>$ grails s2&#45;quickstart grails.demo.flexcontacts User Role</pre></div><p class="paragraph"/><h4>4. Configure the Flex SDK location.</h4><p class="paragraph"/>If you don't have a <code>FLEX_HOME</code> environment variable set, configure the location of your Flex SDK in <code>grails-app/conf/Config.groovy</code>:<p class="paragraph"/><div class="code"><pre>grails.plugin.flex.home = '/path/to/your/flex/sdk'</pre></div><p class="paragraph"/><h4>5. Initialize the Flex plugin.</h4>
+<div class="code"><pre>$ grails flex&#45;init</pre></div><p class="paragraph"/><h4>6. Create the Contact domain class.</h4>
+<div class="code"><pre>$ grails create&#45;domain&#45;class grails.demo.flexcontacts.Contact</pre></div><p class="paragraph"/>Update the domain class with this code:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> grails.demo.flexcontacts<p class="paragraph"/>class Contact <span class="java&#45;keyword">implements</span> Serializable &#123;<p class="paragraph"/>   <span class="java&#45;keyword">static</span> <span class="java&#45;keyword">final</span> <span class="java&#45;object">long</span> serialVersionUID = 1<p class="paragraph"/>   <span class="java&#45;object">String</span> firstName
+   <span class="java&#45;object">String</span> lastName
+   <span class="java&#45;object">String</span> address
+   <span class="java&#45;object">String</span> city
+   <span class="java&#45;object">String</span> state
+   <span class="java&#45;object">String</span> zip
+   <span class="java&#45;object">String</span> phone
+   <span class="java&#45;object">String</span> email<p class="paragraph"/>   <span class="java&#45;keyword">static</span> constraints = &#123;
+      firstName size: 1..50, blank: <span class="java&#45;keyword">false</span>
+      lastName size: 1..50, blank: <span class="java&#45;keyword">false</span>
+      address size: 1..50, blank: <span class="java&#45;keyword">false</span>
+      city size: 1..50, blank: <span class="java&#45;keyword">false</span>
+      state size: 1..20, blank: <span class="java&#45;keyword">false</span>
+      zip size: 1..20, nullable: <span class="java&#45;keyword">true</span>
+      phone size: 1..50, nullable: <span class="java&#45;keyword">true</span>
+      email size: 1..50, blank: <span class="java&#45;keyword">false</span>
+   &#125;<p class="paragraph"/>   <span class="java&#45;keyword">static</span> List&#60;Contact&#62; findByName(<span class="java&#45;object">String</span> name) &#123;
+      executeQuery(<span class="java&#45;quote">"from Contact where UPPER(CONCAT(firstName, ' ', lastName)) LIKE :name ORDER BY firstName, lastName"</span>,
+         &#91;name: <span class="java&#45;quote">"%"</span> + name.toUpperCase() + <span class="java&#45;quote">"%"</span>&#93;)
+   &#125;
+&#125;</pre></div><p class="paragraph"/><h4>7. Create the Contact service.</h4>
+<div class="code"><pre>$ grails create&#45;service grails.demo.flexcontacts.Contact</pre></div><p class="paragraph"/>Update the service with this code:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> grails.demo.flexcontacts<p class="paragraph"/><span class="java&#45;keyword">import</span> org.springframework.flex.remoting.RemotingDestination<p class="paragraph"/>@RemotingDestination(channels = &#91;'my&#45;amf'&#93;)
+class ContactService &#123;<p class="paragraph"/>   List&#60;Contact&#62; findByName(<span class="java&#45;object">String</span> name) &#123;
+      Contact.findByName name
+   &#125;<p class="paragraph"/>   List&#60;Contact&#62; findAll() &#123;
+      Contact.list()
+   &#125;<p class="paragraph"/>   Contact findById(<span class="java&#45;object">long</span> id) &#123;
+      Contact.get id
+   &#125;<p class="paragraph"/>   Contact create(Contact contact) &#123;
+      contact.id = <span class="java&#45;keyword">null</span>
+      contact.save()
+      contact
+   &#125;<p class="paragraph"/>   <span class="java&#45;object">boolean</span> update(Contact contact) &#123;
+      Contact fromDb = Contact.get(contact.id)
+      <span class="java&#45;keyword">if</span> (!fromDb) &#123;
+         <span class="java&#45;keyword">return</span> <span class="java&#45;keyword">false</span>
+      &#125;
+      fromDb.properties = contact.properties
+      fromDb.validate() &#38;&#38; fromDb.save()
+   &#125;<p class="paragraph"/>   <span class="java&#45;object">boolean</span> remove(Contact contact) &#123;
+      Contact.get(contact.id)?.delete()
+      <span class="java&#45;keyword">true</span>
+   &#125;
+&#125;</pre></div><p class="paragraph"/><h4>8. Create the primary MXML file.</h4>
+<div class="code"><pre>$ grails create&#45;mxml web&#45;app/Main.mxml</pre></div><p class="paragraph"/>Update the MXML file with this code:<p class="paragraph"/><div class="code"><pre>&#60;?xml version=<span class="java&#45;quote">"1.0"</span> encoding=<span class="java&#45;quote">"utf&#45;8"</span>?&#62;
+&#60;mx:Application xmlns:mx=<span class="java&#45;quote">"http://www.adobe.com/2006/mxml"</span> xmlns=<span class="java&#45;quote">"&#42;"</span>&#62;<p class="paragraph"/>   &#60;mx:Script&#62;&#60;!&#91;CDATA&#91;<p class="paragraph"/>      <span class="java&#45;keyword">import</span> mx.rpc.events.FaultEvent;
+      <span class="java&#45;keyword">import</span> mx.controls.Alert;
+      <span class="java&#45;keyword">import</span> mx.collections.ArrayCollection;
+      <span class="java&#45;keyword">import</span> mx.rpc.events.ResultEvent;<p class="paragraph"/>      &#91;Bindable&#93; <span class="java&#45;keyword">private</span> <span class="java&#45;keyword">var</span> contacts:ArrayCollection;<p class="paragraph"/>      <span class="java&#45;keyword">private</span> function resultHandler(event:ResultEvent):void &#123;
+         contacts = event.result as ArrayCollection
+      &#125;<p class="paragraph"/>      <span class="java&#45;keyword">private</span> function faultHandler(event:FaultEvent):void &#123;
+         Alert.show(event.fault.faultDetail);
+      &#125;<p class="paragraph"/>      <span class="java&#45;keyword">public</span> function openContact(contact:Contact):void &#123;
+         <span class="java&#45;keyword">var</span> children:Array = tn.getChildren();
+         <span class="java&#45;keyword">for</span> (<span class="java&#45;keyword">var</span> i:<span class="java&#45;object">int</span> = 0; i&#60;children.length; i++) &#123;
+            <span class="java&#45;keyword">if</span> (ContactForm(children&#91;i&#93;).contact.id == contact.id) &#123;
+               tn.selectedChild = children&#91;i&#93;;
+               <span class="java&#45;keyword">return</span>;
+            &#125;
+         &#125;<p class="paragraph"/>         <span class="java&#45;keyword">var</span> form:ContactForm = <span class="java&#45;keyword">new</span> ContactForm();
+         tn.addChild(form);
+         form.contact = contact;
+         tn.selectedChild = form;
+      &#125;
+   &#93;&#93;&#62;&#60;/mx:Script&#62;<p class="paragraph"/>   &#60;mx:RemoteObject id=<span class="java&#45;quote">"ro"</span> destination=<span class="java&#45;quote">"contactService"</span> fault=<span class="java&#45;quote">"faultHandler(event)"</span>&#62;
+      &#60;mx:method name=<span class="java&#45;quote">"findByName"</span> result=<span class="java&#45;quote">"resultHandler(event)"</span>/&#62;
+   &#60;/mx:RemoteObject&#62;<p class="paragraph"/>   &#60;mx:ApplicationControlBar width=<span class="java&#45;quote">"100%"</span>&#62;
+      &#60;mx:TextInput id=<span class="java&#45;quote">"searchStr"</span>/&#62;
+      &#60;mx:Button label=<span class="java&#45;quote">"Search"</span> click=<span class="java&#45;quote">"ro.findByName(searchStr.text)"</span>/&#62;
+      &#60;mx:Button label=<span class="java&#45;quote">"New Contact"</span> click=<span class="java&#45;quote">"openContact(<span class="java&#45;keyword">new</span> Contact())"</span>/&#62;
+   &#60;/mx:ApplicationControlBar&#62;<p class="paragraph"/>   &#60;mx:HDividedBox width=<span class="java&#45;quote">"100%"</span> height=<span class="java&#45;quote">"100%"</span>&#62;
+      &#60;mx:DataGrid id=<span class="java&#45;quote">"dg"</span> dataProvider=<span class="java&#45;quote">"&#123;contacts&#125;"</span> width=<span class="java&#45;quote">"30%"</span> height=<span class="java&#45;quote">"100%"</span>
+         doubleClickEnabled=<span class="java&#45;quote">"<span class="java&#45;keyword">true</span>"</span>
+         doubleClick=<span class="java&#45;quote">"openContact(dg.selectedItem as Contact)"</span>&#62;
+         &#60;mx:columns&#62;
+            &#60;mx:DataGridColumn dataField=<span class="java&#45;quote">"firstName"</span> headerText=<span class="java&#45;quote">"First Name"</span>/&#62;
+            &#60;mx:DataGridColumn dataField=<span class="java&#45;quote">"lastName"</span> headerText=<span class="java&#45;quote">"Last Name"</span>/&#62;
+         &#60;/mx:columns&#62;
+      &#60;/mx:DataGrid&#62;
+      &#60;mx:TabNavigator id=<span class="java&#45;quote">"tn"</span> width=<span class="java&#45;quote">"70%"</span> height=<span class="java&#45;quote">"100%"</span>/&#62;
+   &#60;/mx:HDividedBox&#62;<p class="paragraph"/>&#60;/mx:Application&#62;</pre></div><p class="paragraph"/><h4>9. Create the contact form MXML file.</h4>
+<div class="code"><pre>$ grails create&#45;mxml web&#45;app/ContactForm.mxml</pre></div><p class="paragraph"/>Update the MXML file with this code:<p class="paragraph"/><div class="code"><pre>&#60;?xml version=<span class="java&#45;quote">"1.0"</span> encoding=<span class="java&#45;quote">"utf&#45;8"</span>?&#62;
+&#60;mx:Canvas xmlns:mx=<span class="java&#45;quote">"http://www.adobe.com/2006/mxml"</span> width=<span class="java&#45;quote">"100%"</span> height=<span class="java&#45;quote">"100%"</span>
+   backgroundColor=<span class="java&#45;quote">"&#35;FFFFFF"</span>
+   label=<span class="java&#45;quote">"&#123;contact.id&#62;0?contact.firstName+' '+contact.lastName:'New Contact'&#125;"</span>&#62;<p class="paragraph"/>   &#60;mx:Script&#62;&#60;!&#91;CDATA&#91;<p class="paragraph"/>      <span class="java&#45;keyword">import</span> mx.rpc.events.FaultEvent;
+      <span class="java&#45;keyword">import</span> mx.rpc.events.ResultEvent;
+      <span class="java&#45;keyword">import</span> mx.controls.Alert;<p class="paragraph"/>      &#91;Bindable&#93; <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> contact:Contact;<p class="paragraph"/>      <span class="java&#45;keyword">private</span> function save():void &#123;
+         contact.firstName = firstName.text;
+         contact.lastName = lastName.text;
+         contact.email = email.text;
+         contact.phone = phone.text;
+         contact.address = address.text;
+         contact.city = city.text;
+         contact.state = state.text;
+         contact.zip = zip.text;
+         <span class="java&#45;keyword">if</span> (contact.id == 0) &#123;
+            ro.create(contact);
+         &#125;
+         <span class="java&#45;keyword">else</span> &#123;
+            ro.update(contact);
+         &#125;
+      &#125;<p class="paragraph"/>      <span class="java&#45;keyword">private</span> function create_resultHandler(event:ResultEvent):void &#123;
+         contact.id = event.result.id;
+      &#125;<p class="paragraph"/>      <span class="java&#45;keyword">private</span> function deleteItem():void &#123;
+         ro.remove(contact);
+      &#125;<p class="paragraph"/>      <span class="java&#45;keyword">private</span> function remove_resultHandler(event:ResultEvent):void &#123;
+         parent.removeChild(<span class="java&#45;keyword">this</span>);
+      &#125;<p class="paragraph"/>      <span class="java&#45;keyword">private</span> function faultHandler(event:FaultEvent):void &#123;
+         Alert.show(event.fault.faultDetail);
+      &#125;
+   &#93;&#93;&#62;&#60;/mx:Script&#62;<p class="paragraph"/>   &#60;mx:RemoteObject id=<span class="java&#45;quote">"ro"</span> destination=<span class="java&#45;quote">"contactService"</span>&#62;
+      &#60;mx:method name=<span class="java&#45;quote">"create"</span> result=<span class="java&#45;quote">"create_resultHandler(event)"</span>/&#62;
+      &#60;mx:method name=<span class="java&#45;quote">"remove"</span> result=<span class="java&#45;quote">"remove_resultHandler(event)"</span>/&#62;
+   &#60;/mx:RemoteObject&#62;<p class="paragraph"/>   &#60;mx:Form&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"Id"</span>&#62;
+         &#60;mx:TextInput text=<span class="java&#45;quote">"&#123;contact.id&#125;"</span> enabled=<span class="java&#45;quote">"<span class="java&#45;keyword">false</span>"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"First Name"</span>&#62;
+         &#60;mx:TextInput id=<span class="java&#45;quote">"firstName"</span> text=<span class="java&#45;quote">"&#123;contact.firstName&#125;"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"Last Name"</span>&#62;
+         &#60;mx:TextInput id=<span class="java&#45;quote">"lastName"</span> text=<span class="java&#45;quote">"&#123;contact.lastName&#125;"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"Email"</span>&#62;
+         &#60;mx:TextInput id=<span class="java&#45;quote">"email"</span> text=<span class="java&#45;quote">"&#123;contact.email&#125;"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"Phone"</span>&#62;
+         &#60;mx:TextInput id=<span class="java&#45;quote">"phone"</span> text=<span class="java&#45;quote">"&#123;contact.phone&#125;"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"Address"</span>&#62;
+         &#60;mx:TextInput id=<span class="java&#45;quote">"address"</span> text=<span class="java&#45;quote">"&#123;contact.address&#125;"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"City"</span>&#62;
+         &#60;mx:TextInput id=<span class="java&#45;quote">"city"</span> text=<span class="java&#45;quote">"&#123;contact.city&#125;"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"State"</span>&#62;
+         &#60;mx:TextInput id=<span class="java&#45;quote">"state"</span> text=<span class="java&#45;quote">"&#123;contact.state&#125;"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+      &#60;mx:FormItem label=<span class="java&#45;quote">"Zip"</span>&#62;
+         &#60;mx:TextInput id=<span class="java&#45;quote">"zip"</span> text=<span class="java&#45;quote">"&#123;contact.zip&#125;"</span>/&#62;
+      &#60;/mx:FormItem&#62;
+   &#60;/mx:Form&#62;<p class="paragraph"/>   &#60;mx:HBox left=<span class="java&#45;quote">"8"</span> bottom=<span class="java&#45;quote">"8"</span>&#62;
+      &#60;mx:Button label=<span class="java&#45;quote">"Close"</span> click=<span class="java&#45;quote">"parent.removeChild(<span class="java&#45;keyword">this</span>)"</span>/&#62;
+      &#60;mx:Button label=<span class="java&#45;quote">"Save"</span> click=<span class="java&#45;quote">"save()"</span>/&#62;
+      &#60;mx:Button label=<span class="java&#45;quote">"Delete"</span> click=<span class="java&#45;quote">"deleteItem()"</span>/&#62;
+   &#60;/mx:HBox&#62;<p class="paragraph"/>&#60;/mx:Canvas&#62;</pre></div><p class="paragraph"/><h4>10. Generate the Contact ActionScript class.</h4>
+<div class="code"><pre>$ grails generate&#45;actionscript&#45;class Contact grails.demo.flexcontacts.Contact</pre></div><p class="paragraph"/>That will create this ActionScript class:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span>  &#123;<p class="paragraph"/>   &#91;Bindable&#93;
+   &#91;RemoteClass(alias='grails.demo.flexcontacts.Contact')&#93;
+   <span class="java&#45;keyword">public</span> class Contact &#123;
+      <span class="java&#45;keyword">public</span> function Contact() &#123;
+         // constructor
+      &#125;<p class="paragraph"/>      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> id:<span class="java&#45;object">int</span>;
+      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> address:<span class="java&#45;object">String</span>;
+      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> city:<span class="java&#45;object">String</span>;
+      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> email:<span class="java&#45;object">String</span>;
+      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> firstName:<span class="java&#45;object">String</span>;
+      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> lastName:<span class="java&#45;object">String</span>;
+      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> phone:<span class="java&#45;object">String</span>;
+      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> state:<span class="java&#45;object">String</span>;
+      <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">var</span> zip:<span class="java&#45;object">String</span>;
+   &#125;
+&#125;</pre></div><p class="paragraph"/><h4>11. Edit grails-app/conf/BootStrap.groovy and add some test data.</h4><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> grails.demo.flexcontacts.Contact<p class="paragraph"/>class BootStrap &#123;<p class="paragraph"/>   def sessionFactory<p class="paragraph"/>   def init = &#123; servletContext &#45;&#62;
+      createContacts()
+      sessionFactory.currentSession.flush()
+   &#125;<p class="paragraph"/>   <span class="java&#45;keyword">private</span> void createContacts() &#123;
+      <span class="java&#45;keyword">if</span> (Contact.count()) &#123;
+         println 'Contacts already exist'
+      &#125;
+      <span class="java&#45;keyword">else</span> &#123;
+         println 'Inserting sample data in table CONTACT...'
+         createContact 'Christophe', 'Coenraets', '275 Grove St', 'Newton', 'MA', '02476', '617&#45;219&#45;2000', 'ccoenrae@adobe.com'
+         createContact 'John', 'Smith', '1 Main st', 'Boston', 'MA', '01744', '617&#45;219&#45;2001', 'jsmith@mail.com'
+         createContact 'Lisa', 'Taylor', '501 Townsend st', 'San Francisco', 'CA', '', '415&#45;534&#45;7865', 'ltaylor@mail.com'
+         createContact 'Noah', 'Jones', '1200 5th Avenue ', 'New York', 'NY', '', '212&#45;764&#45;2345', 'njones@mail.com'
+         createContact 'Bill', 'Johnson', '1345 6th street', 'Chicago', 'IL', '', '', 'bjohnson@mail.com'
+         createContact 'Chloe', 'Rodriguez', '34 Elm street', 'Dallas', 'TX', '', '415&#45;534&#45;7865', 'crodriguez@mail.com'
+         createContact 'Jorge', 'Espinosa', '23 Putnam Avenue', 'Seattle', 'WA', '', '', 'jespinosa@mail.com'
+         createContact 'Amy', 'King', '11 Summer st', 'Miami', 'FL', '', '', 'aking@mail.com'
+         createContact 'Boris', 'Jefferson', '222 Spring st', 'Denver', 'CO', '', '415&#45;534&#45;7865', 'bjefferson@mail.com'
+         createContact 'Linda', 'Madison', '564 Winter st', 'Washington', 'DC', '', '', 'lmadison@mail.com'
+      &#125;
+   &#125;<p class="paragraph"/>   <span class="java&#45;keyword">private</span> void createContact(<span class="java&#45;object">String</span> firstName, <span class="java&#45;object">String</span> lastName, <span class="java&#45;object">String</span> address, <span class="java&#45;object">String</span> city,
+         <span class="java&#45;object">String</span> state, <span class="java&#45;object">String</span> zip, <span class="java&#45;object">String</span> phone, <span class="java&#45;object">String</span> email) &#123;
+      <span class="java&#45;keyword">new</span> Contact(firstName: firstName, lastName: lastName, address: address, city: city,
+            state: state, zip: zip, phone: phone, email: email).save(failOnError: <span class="java&#45;keyword">true</span>)
+   &#125;
+&#125;</pre></div><p class="paragraph"/><h4>12. Start the server.</h4>
+<div class="code"><pre>$ grails run&#45;app</pre></div><p class="paragraph"/><h4>13. Navigate to <a href="http://localhost:8080/FlexContacts/Main.mxml" target="blank">http://localhost:8080/FlexContacts/Main.mxml</a>.</h4><p class="paragraph"/>The Flash page should load after the webtier mxmlc compiler compiles the swf.<p class="paragraph"/><h4>14. Experiment with the application.</h4>
+<ul class="star">
+<li>if you leave the search box empty all users will be returned</li>
+<li>you can also search by full or partial name</li>
+<li>double-clicking a name in the result list displays the edit form for that person</li>
+<li>making changes to a person's contact data should update the search results</li>
+<li>creating or deleting a contact doesn't update the search results - re-run the search to refresh</li>
+<li>you can sort the results by clicking the First Name and Last Name column headers</li>
+</ul><p class="paragraph"/><h4>15. Verify that ActionScript isn't browseable.</h4><p class="paragraph"/>Attempt to open <a href="http://localhost:8080/FlexContacts/Contact.as" target="blank">http://localhost:8080/FlexContacts/Contact.as</a> in a browser - you should get a 403 error page even though it's in the web-app folder and .mxml files load. This is because ActionScript files are explicitly blocked, as are .mxml files in production mode (which we'll see in a bit).<p class="paragraph"/><h4>16. Build and deploy a war file.</h4><p class="paragraph"/>Shut down the development mode application (using CTRL-C).<p class="paragraph"/>Configure precompilation in <code>grails-app/conf/Config.groovy</code>:<p class="paragraph"/><div class="code"><pre>grails.plugin.flex.precompileMxml.enabled = <span class="java&#45;keyword">true</span>
+grails.plugin.flex.precompileMxml.files = &#91;'Main.mxml'&#93;
+grails.plugin.flex.precompileMxml.htmlWrapper.create = <span class="java&#45;keyword">true</span>
+grails.plugin.flex.mxmlc.contextRoot = 'FlexContacts'</pre></div><p class="paragraph"/>The last line configuring the <code>contextRoot</code> attribute is required since <code>run-war</code> deploys with the same context as in development, but in general this should be configured with the actual value of the context root.<p class="paragraph"/>Start the app using a war in production mode:<p class="paragraph"/><div class="code"><pre>$ grails prod run&#45;war</pre></div><p class="paragraph"/>Note that the output indicates that Main.mxml gets precompiled and that a GSP wrapper is created for it:<p class="paragraph"/><div class="code"><pre>&#91;echo&#93; Precompiling MXML Main.mxml
+ . . .
+&#91;echo&#93; Generating Main.gsp</pre></div><p class="paragraph"/><h4>17. Navigate to <a href="http://localhost:8080/FlexContacts/Main.gsp" target="blank">http://localhost:8080/FlexContacts/Main.gsp</a>.</h4><p class="paragraph"/>The Flash page should load very quickly since the swf is already compiled. The functionality should be the same as before when testing with Main.mxml.<p class="paragraph"/><h4>18. Verify that ActionScript and MXML aren't browseable in production mode.</h4><p class="paragraph"/>Attempt to open <a href="http://localhost:8080/FlexContacts/Contact.as" target="blank">http://localhost:8080/FlexContacts/Contact.as</a> in a browser - you should get a 403 error page even though it's in the web-app folder. Also attempt to open <a href="http://localhost:8080/FlexContacts/Main.mxml" target="blank">http://localhost:8080/FlexContacts/Main.mxml</a> in a browser - you should get a 403 for that too. This is because ActionScript and MXML files are explicitly blocked in production mode - only .swf files can be loaded.<p class="paragraph"/>
+
+    
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>
