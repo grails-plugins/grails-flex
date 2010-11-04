@@ -16,7 +16,7 @@ h4. Grails services as remote destinations
 
 As described in the BlazeDS plugin documentation, it's simple to access a Grails service as a remote service from Flex - just annotate the service with the @org.springframework.flex.remoting.RemotingDestination@ annotation. BlazeDS handles invoking method calls and marshalling parameters and return values for you.
 
-One thing that's important to note is that although there are two XML configuration files (@flex-config.xml@ and @flex-webtier-config.xml@) you probably won't need to make many changes there. In typical Flex applications you would register remote services using XML, but Grails services are well suited as candidates for remote services.
+One thing that's important to note is that although there is a @services-config.xml@ configuration file (created when the BlazeDS plugin is installed) you probably won't need to make many changes there. In typical Flex applications you would register remote services using XML, but Grails services are well suited as candidates for remote services.
 
 h4. Flash Builder integration
 
