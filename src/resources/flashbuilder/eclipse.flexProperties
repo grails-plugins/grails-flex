@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexProperties enableServiceManager="false" flexServerFeatures="4" flexServerType="2" serverContextRoot="/@project-name@" serverRoot="@server-root@" serverRootURL="@server-root-url@" toolCompile="true" useServerFlexSDK="false" version="2"/>
+<flexProperties enableServiceManager="false" flexServerFeatures="4" flexServerType="2" serverContextRoot="/@project-name@" serverRoot="@basedir@/web-app" serverRootURL="@server-root-url@" toolCompile="true" useServerFlexSDK="false" version="2"/>

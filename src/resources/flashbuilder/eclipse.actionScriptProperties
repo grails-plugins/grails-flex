@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <actionScriptProperties mainApplicationPath="Main.mxml" projectUUID="@project-uuid@" version="6">
-  <compiler additionalCompilerArguments="-services &quot;@service-path@&quot; -locale en_US -sp @locale-path@ -define=GFS::security,false" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="true" htmlExpressInstall="true" htmlGenerate="true" htmlHistoryManagement="true" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="@output-folder@" rootURL="@server-root-url@" sourceFolderPath="@flex-src@" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="false" useDebugRSLSwfs="true" verifyDigests="true" warn="true">
+  <compiler additionalCompilerArguments="-services &quot;@service-path@&quot; -locale en_US -sp @locale-path@" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="true" htmlExpressInstall="true" htmlGenerate="true" htmlHistoryManagement="true" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="@output-folder@" sourceFolderPath="@flex-src@" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="false" useDebugRSLSwfs="true" verifyDigests="true" warn="true">
 		<compilerSourcePath/>
 		<libraryPath defaultLinkType="0">
 			<libraryPathEntry kind="4" path="">
@@ -15,7 +15,7 @@
 		<sourceAttachmentPath/>
 	</compiler>
 	<applications>
-		<application path="Main.mxml"/>
+		<application path="web-app/Main.mxml"/>
 	</applications>
 	<modules/>
 	<buildCSSFiles/>
