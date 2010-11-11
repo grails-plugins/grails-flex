@@ -26,7 +26,7 @@ class FlexGrailsPlugin {
 	String title = 'Provides integration between Grails and Flex'
 	String description = 'Provides integration between Grails and Flex'
 	String documentation = 'http://grails.org/plugins/flex'
-	Map dependsOn = ['blazeds': '1.1 > *']
+	Map dependsOn = ['blazeds': '2.0 > *']
 	List pluginExcludes = [
 		'web-app/WEB-INF/**',
 		'grails-app/domain/**',

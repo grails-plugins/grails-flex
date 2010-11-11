@@ -28,7 +28,6 @@ String grailsAppName = metadata['app.name']
 servicePath = "\$DOCUMENTS/$grailsAppName/web-app/WEB-INF/flex/services-config.xml"
 serverRoot = "http://localhost:8080/"
 serverRootUrl = "http://localhost:8080/$grailsAppName"
-outputFolder = "web-app"
 localePath = "\$DOCUMENTS/$grailsAppName/grails-app/i18n"
 
 target(integrateWithFlashBuilder: 'Configures project files for Flash Builder') {
@@ -108,16 +107,19 @@ target(addFlexNature: 'Add Flex Nature to .project') {
 target(createDotFlexProperties: 'Create .flexProperties') {
 
 	ant.copy file: "$pluginDirPath/src/resources/flashbuilder/eclipse.flexProperties",
-		      tofile: "$basedir/.flexProperties", verbose: true
+	         tofile: "$basedir/.flexProperties", verbose: true
 
 	ant.replace file: "$basedir/.flexProperties",
-		     	   token: "@server-root@", value: serverRoot
+	            token: "@server-root@", value: serverRoot
 
 	ant.replace file: "$basedir/.flexProperties",
-	    		   token: "@server-root-url@", value: serverRootUrl
+	            token: "@server-root-url@", value: serverRootUrl
 
 	ant.replace file: "$basedir/.flexProperties",
-    			   token: "@project-name@", value: grailsAppName
+	            token: "@project-name@", value: grailsAppName
+
+	ant.replace file: "$basedir/.flexProperties",
+	            token: "@basedir@", value: basedir.replaceAll('\\\\', '/')
 }
 
 target(createActionScriptProperties: 'Create .actionScriptProperties') {
@@ -128,7 +130,7 @@ target(createActionScriptProperties: 'Create .actionScriptProperties') {
 	            token: "@service-path@", value: servicePath
 
 	ant.replace file: "$basedir/.actionScriptProperties",
-	            token: "@output-folder@", value: outputFolder
+	            token: "@output-folder@", value: 'web-app'
 
 	ant.replace file: "$basedir/.actionScriptProperties",
 	            token: "@server-root-url@", value: serverRootUrl
@@ -140,10 +142,10 @@ target(createActionScriptProperties: 'Create .actionScriptProperties') {
 	            token: "@project-uuid@", value: UUID.randomUUID()
 
 	ant.replace file: "$basedir/.actionScriptProperties",
-	            token: "@flex-src@", value: antProperty('flex.srcdir')
+	            token: "@flex-src@", value: 'web-app'
 
 	ant.replace file: "$basedir/.actionScriptProperties",
-	            token: "@lib-dir@", value: antProperty('lib.destdir')
+	            token: "@lib-dir@", value: 'WEB-INF/flex/user_classes'
 }
 
 setDefaultTarget 'integrateWithFlashBuilder'
